@@ -1,4 +1,4 @@
-/*
+/**
  * PersianJs v0.1.0
  * https://github.com/usablica/persian.js
  * MIT licensed
@@ -9,10 +9,14 @@
 
     //Default config/variables
     var VERSION = "0.1.0",
-        //Check for nodeJS
+    //Check for nodeJS
         hasModule = (typeof module !== 'undefined' && module.exports);
 
-    //PersianJs main function/constructor, used for prototype.
+    /**
+     * PersianJs main class
+     *
+     * @class PersianJs
+     */
     function PersianJs(str) {
         this._str = str;
     }
@@ -20,9 +24,9 @@
     /**
      * Used for convert Arabic characters to Persian
      *
-     * @param {String} value 
+     * @method _toPersianChar
+     * @param {String} value
      * @return {String} Returns Converted string
-     * @api private
      */
     function _toPersianChar(value) {
         if (!value) {
@@ -40,9 +44,9 @@
     /**
      * Used for convert Arabic numbers to Persian
      *
-     * @param {String} value 
+     * @method _toPersianNumber
+     * @param {String} value
      * @return {String} Returns Converted numbers
-     * @api private
      */
     function _toPersianNumber(value) {
         if (!value) {
@@ -57,14 +61,48 @@
         return value;
     }
 
+    /**
+     * Used for fix Persian Charachters in URL
+     * https://fa.wikipedia.org/wiki/مدیاویکی:Gadget-Extra-Editbuttons-Functions.js
+     *
+     * @param {String} value
+     * @return {String} Returns fixed URL
+     * @api private
+     */
+    function _fixURL(value) {
+        if (!value) {
+            return;
+        }
+        // Replace every %20 with _ to protect them from decodeURI
+        var old = "";
+        while (old != value) {
+            old = value;
+            value = value.replace(/(http\S+?)\%20/g, '$1\u200c\u200c\u200c_\u200c\u200c\u200c');
+        }
+        // Decode URIs
+        // NOTE: This would convert all %20's to _'s which could break some links
+        // but we will undo that later on
+        value = value.replace(/(http\S+)/g, function (s, p) {
+            return decodeURI(p);
+        });
+        // Revive all instances of %20 to make sure no links is broken
+        value = value.replace(/\u200c\u200c\u200c_\u200c\u200c\u200c/g, '%20');
+        return value;
+    }
+
     var persianJs = function(inputStr) {
         if (inputStr == "" || inputStr == null) {
             return null;
         }
         return new PersianJs(inputStr);
     }
-    
-    //Version
+
+    /**
+     * Current PersianJs version
+     *
+     * @property version
+     * @type String
+     */
     persianJs.version = VERSION;
 
     //Prototype
@@ -87,6 +125,9 @@
         },
         toPersianNumber: function() {
             return _toPersianNumber(this._str);
+        },
+        fixURL: function() {
+            return _fixURL(this._str);
         }
     };
 
